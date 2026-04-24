@@ -24,7 +24,7 @@ The Limitless MCP server is connected (verify with `claude mcp list`). It expose
 - I ask to update these files "from today" / "this week" / "since last time".
 - Answering well depends on recent context (e.g. "what did I promise Julia?").
 
-**Typical tools:** `list_lifelogs` (date range), `get_lifelog` (one transcript in full), plus any search tool the server exposes.
+**Typical tools:** `mcp__limitless__searchLifelogsWithTranscripts` — search or list lifelogs (supply a date range or a query). Run `/mcp` inside Claude Code to see the full, current list; treat this file as guidance, not a hardcoded inventory.
 
 ## Routing rules — what goes where
 
