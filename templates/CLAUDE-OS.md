@@ -11,7 +11,9 @@ This directory is my personal "Claude OS" — the source of truth for who I am, 
 
 ## Related directory
 
-- **~/LUX Lighting Services/** — business documents, proposals, vendor info, customer records. When a transcript concerns a specific project/customer already tracked there, update both the LUX file and About My Business.md.
+- **~/Documents/Claude/Projects/LUX Lighting Services/** — business documents, proposals, vendor info, customer records. This is the source of truth for LUX. When a transcript concerns a specific project/customer already tracked there, update both the LUX file and About My Business.md.
+
+> Note: other copies of `LUX Lighting Services` exist at `~/Library/Mobile Documents/com~apple~CloudDocs/LUX Lighting Services` and `~/Documents/Documents - Carlos's Mac mini/LUX Lighting Services`. Do not write to those — they are stale or sync copies.
 
 ## Limitless MCP integration
 
@@ -31,11 +33,11 @@ When you process Limitless transcripts, classify each piece of info and route it
 | Signal in the transcript | File | How |
 |---|---|---|
 | New personal fact (preference, relationship, goal, health, schedule) | About Me.md | Edit in place under the right section. If it contradicts existing info, update and log the change in Memory.md. |
-| New business fact (pricing, service, vendor, process) | About My Business.md | Edit in place. Mirror to `~/LUX Lighting Services/` if it touches a tracked project/customer. |
+| New business fact (pricing, service, vendor, process) | About My Business.md | Edit in place. Mirror to `~/Documents/Claude/Projects/LUX Lighting Services/` if it touches a tracked project/customer. |
 | Commitment I made (or that was made to me) | Memory.md → "Open Commitments" | Append with date, who, what, by when. |
 | Decision made | Memory.md → "Decisions" | Append with date and rationale. |
 | Notable but not a fact/commitment/decision | Memory.md → "Notes" | Append with date. |
-| Customer/vendor interaction for LUX | About My Business.md + `~/LUX Lighting Services/<file>` | Summary in About My Business, full detail in the project file. |
+| Customer/vendor interaction for LUX | About My Business.md + `~/Documents/Claude/Projects/LUX Lighting Services/<file>` | Summary in About My Business, full detail in the project file. If no existing file matches, ask before creating a new one. |
 
 ## Update discipline
 
