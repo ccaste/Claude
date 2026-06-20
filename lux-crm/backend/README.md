@@ -11,6 +11,8 @@ Postgres schema + row-level security for the CRM.
    - `supabase/migrations/0003_christmas.sql`  (Christmas design + price book + storage)
    - `supabase/migrations/0004_lifecycle.sql`  (lifecycle phases, appointments, deposits)
    - `supabase/migrations/0005_quote_items.sql` (rich quote items + item defaults)
+   - `supabase/migrations/0006_spacing_light_pricing.sql` (light-driven units, spacing)
+   - `supabase/migrations/0007_quote_flow.sql`  (quote send/accept, changes requested)
 
    (Or use the Supabase CLI: `supabase db push`.)
 

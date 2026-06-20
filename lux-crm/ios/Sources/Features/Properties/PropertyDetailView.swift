@@ -7,6 +7,7 @@ struct PropertyDetailView: View {
     @State private var quotes: [Quote] = []
     @State private var storage: [Fixture] = []
     @State private var buildingQuote: QuoteStart?
+    @State private var selectedQuote: Quote?
 
     var body: some View {
         List {
@@ -24,14 +25,18 @@ struct PropertyDetailView: View {
             Section("Quotes") {
                 if quotes.isEmpty { Text("No quotes yet.").foregroundStyle(.secondary) }
                 ForEach(quotes) { q in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(q.number).font(.headline)
-                            Text(q.status.rawValue.capitalized).font(.caption).foregroundStyle(.secondary)
+                    Button { selectedQuote = q } label: {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(q.number).font(.headline)
+                                Text(q.status.label).font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text(q.total.usd).font(.headline)
+                            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
                         }
-                        Spacer()
-                        Text(q.total.usd).font(.headline)
                     }
+                    .buttonStyle(.plain)
                 }
                 Button { buildingQuote = QuoteStart(property: property) } label: {
                     Label("Build quote", systemImage: "plus.rectangle.on.rectangle")
@@ -62,6 +67,14 @@ struct PropertyDetailView: View {
             QuoteBuilderView(property: q.property, job: nil) {
                 buildingQuote = nil
                 Task { await load() }
+            }
+        }
+        .sheet(item: $selectedQuote) { quote in
+            NavigationStack {
+                QuoteDetailView(quote: quote, onDone: {
+                    selectedQuote = nil
+                    Task { await load() }
+                })
             }
         }
         .task { await load() }

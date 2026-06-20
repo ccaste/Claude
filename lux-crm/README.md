@@ -43,9 +43,10 @@ path. The anon key is safe to ship because RLS, not the app, guards the data.
 |---|---|---|
 | **1. Foundation** | Schema + RLS, auth, dashboard, clients, jobs, schedule | ✅ |
 | **2b. Lifecycle** | Full lead→quoted→approved→installed→stored pipeline, appointments (virtual/in-person), quote accept/decline, auto-invoice + deposit + balance payments, visits (install/greenery/maintenance/takedown). See [LIFECYCLE.md](LIFECYCLE.md) | ✅ |
-| **3. Quote builder** | New Request flow from Today (new/existing customer, multi-property), tap-to-add quote items (roofline, ridges, ground, bushes, tree wrap/canopy, edges, wreaths, garland) with area + light type + color + price, editable defaults, items flow quote→job→invoice→storage | ✅ this PR |
-| **4. Christmas ops** | Storage reclaim workflow, renew last season, photos | next |
-| **5. Money** | Invoice PDFs, Stripe online payments (Edge Function), email/SMS reminders | |
+| **3. Quote builder** | New Request flow from Today (new/existing customer, multi-property), tap-to-add quote items with area + light type + color + spacing + price (light type drives unit & spacing), editable defaults | ✅ |
+| **4. Quote flow** | Quote screen (clearly labeled, not a job), set deposit, send via Email/Text, accept/decline/request-changes; accept creates the job + invoice; items flow quote→job→invoice→storage | ✅ this PR |
+| **5. Christmas ops** | Storage reclaim workflow, renew last season, editable job/invoice line items, photos | next |
+| **6. Money** | Customer-facing accept + online deposit (Stripe), invoice PDFs, automated reminders | |
 | **4. Field & polish** | On-site crew checklist, time tracking, offline cache, push notifications, crew permissions, reporting | |
 
 ## Cost vs Jobber

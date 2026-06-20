@@ -29,7 +29,7 @@ struct QuoteItemDraft: Identifiable {
 final class QuoteBuilderViewModel: ObservableObject {
     @Published var items: [QuoteItemDraft] = []
     @Published var saving = false
-    @Published var savedQuoteNumber: String?
+    @Published var savedQuote: Quote?
     @Published var errorMessage: String?
 
     // Keyed by "itemType|lightType".
@@ -124,7 +124,9 @@ final class QuoteBuilderViewModel: ObservableObject {
                 try await supabase.from("jobs").update(["status": "quoted"])
                     .eq("id", value: jobID).execute()
             }
-            savedQuoteNumber = number
+            let made: [Quote] = (try? await supabase.from("quotes").select()
+                .eq("id", value: quoteID).limit(1).execute().value) ?? []
+            savedQuote = made.first
         } catch {
             errorMessage = error.localizedDescription
         }

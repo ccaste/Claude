@@ -9,8 +9,7 @@ struct JobDetailView: View {
     // Sheets / prompts
     @State private var showAppointment = false
     @State private var showVisit = false
-    @State private var pendingQuote: Quote?
-    @State private var depositText = ""
+    @State private var selectedQuote: Quote?
     @State private var showPayment = false
     @State private var paymentText = ""
 
@@ -39,18 +38,13 @@ struct JobDetailView: View {
                 Task { await vm.addVisit(kind: kind, start: date) }
             }
         }
-        .alert("Deposit required?", isPresented: depositAlertBinding) {
-            TextField("Deposit amount (0 for none)", text: $depositText)
-                .keyboardType(.decimalPad)
-            Button("Accept quote") {
-                if let q = pendingQuote {
-                    Task { await vm.acceptQuote(q, depositAmount: Double(depositText) ?? 0) }
-                }
-                pendingQuote = nil; depositText = ""
+        .sheet(item: $selectedQuote) { quote in
+            NavigationStack {
+                QuoteDetailView(quote: quote, onDone: {
+                    selectedQuote = nil
+                    Task { await vm.load() }
+                })
             }
-            Button("Cancel", role: .cancel) { pendingQuote = nil; depositText = "" }
-        } message: {
-            Text("Accepting creates an invoice and moves this job to Approved.")
         }
         .alert("Record payment", isPresented: $showPayment) {
             TextField("Amount", text: $paymentText).keyboardType(.decimalPad)
@@ -117,28 +111,22 @@ struct JobDetailView: View {
     private var quotesSection: some View {
         Section("Quotes") {
             if vm.quotes.isEmpty {
-                Text("No quote yet. Build the design on the property, then Generate Quote.")
+                Text("No quote yet. Open the property to build one.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             ForEach(vm.quotes) { quote in
-                VStack(alignment: .leading, spacing: 6) {
+                Button { selectedQuote = quote } label: {
                     HStack {
-                        Text(quote.number).font(.headline)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(quote.number).font(.headline)
+                            Text(quote.status.label).font(.caption).foregroundStyle(.secondary)
+                        }
                         Spacer()
                         Text(quote.total.usd).font(.headline)
-                    }
-                    Text(quote.status.rawValue.capitalized).font(.caption).foregroundStyle(.secondary)
-                    if quote.status == .draft || quote.status == .sent {
-                        HStack {
-                            Button("Accept") { pendingQuote = quote }
-                                .buttonStyle(.borderedProminent).controlSize(.small)
-                            Button("Decline", role: .destructive) {
-                                Task { await vm.declineQuote(quote) }
-                            }
-                            .buttonStyle(.bordered).controlSize(.small)
-                        }
+                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
                     }
                 }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -199,10 +187,6 @@ struct JobDetailView: View {
     }
 
     // MARK: - Helpers
-
-    private var depositAlertBinding: Binding<Bool> {
-        Binding(get: { pendingQuote != nil }, set: { if !$0 { pendingQuote = nil } })
-    }
 
     private func loadHeader() async {
         if let c: [Client] = try? await supabase.from("clients").select()

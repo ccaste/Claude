@@ -96,7 +96,17 @@ enum VisitStatus: String, Codable, CaseIterable {
     }
 }
 
-enum QuoteStatus: String, Codable, CaseIterable { case draft, sent, approved, declined, expired }
+enum QuoteStatus: String, Codable, CaseIterable {
+    case draft, sent, approved, declined, expired, changes_requested
+
+    var label: String {
+        switch self {
+        case .approved:          return "Accepted"
+        case .changes_requested: return "Changes Requested"
+        default:                 return rawValue.capitalized
+        }
+    }
+}
 enum InvoiceStatus: String, Codable, CaseIterable { case draft, sent, partial, paid, overdue, void }
 
 struct Organization: Codable, Identifiable, Hashable {

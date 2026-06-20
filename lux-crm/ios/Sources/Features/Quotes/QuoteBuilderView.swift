@@ -52,11 +52,13 @@ struct QuoteBuilderView: View {
                     Task {
                         guard let orgID = auth.profile?.org_id else { return }
                         await vm.saveQuote(orgID: orgID)
-                        if vm.savedQuoteNumber != nil { onFinish() }
                     }
                 }
                 .disabled(vm.items.isEmpty || vm.saving)
             }
+        }
+        .navigationDestination(item: $vm.savedQuote) { quote in
+            QuoteDetailView(quote: quote, onDone: onFinish)
         }
         .sheet(isPresented: $showPalette) {
             ItemPaletteView { type in vm.addItem(type) }
