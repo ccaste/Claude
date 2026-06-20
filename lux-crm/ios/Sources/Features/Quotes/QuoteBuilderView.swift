@@ -62,7 +62,7 @@ struct QuoteBuilderView: View {
             ItemPaletteView { type in vm.addItem(type) }
         }
         .sheet(item: $editingItem) { item in
-            ItemEditorView(item: item) { vm.replace($0) }
+            ItemEditorView(item: item, lookupDefault: { vm.defaultFor($0, $1) }) { vm.replace($0) }
         }
         .task {
             if let orgID = auth.profile?.org_id { await vm.loadDefaults(orgID: orgID) }

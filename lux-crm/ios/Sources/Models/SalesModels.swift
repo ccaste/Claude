@@ -60,6 +60,7 @@ struct LineItem: Codable, Identifiable, Hashable {
     var light_type: LightType?
     var color: String?
     var unit: String?
+    var spacing: String?
 
     var lineTotal: Double { quantity * unit_price }
 }

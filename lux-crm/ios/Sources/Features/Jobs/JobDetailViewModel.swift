@@ -130,7 +130,7 @@ final class JobDetailViewModel: ObservableObject {
             if let invID = createdInvoice.first?.id, !lines.isEmpty {
                 let items = lines.enumerated().map { idx, l in
                     NewInvoiceItem(invoice_id: invID, item_type: l.item_type, area: l.area,
-                                   light_type: l.light_type, color: l.color,
+                                   light_type: l.light_type, color: l.color, spacing: l.spacing,
                                    description: l.description, quantity: l.quantity,
                                    unit: l.unit, unit_price: l.unit_price,
                                    taxable: l.taxable, sort: idx)
@@ -145,7 +145,7 @@ final class JobDetailViewModel: ObservableObject {
                               category: l.item_type?.rawValue ?? "other",
                               description: l.description, quantity: l.quantity, unit: l.unit,
                               item_type: l.item_type, area: l.area, light_type: l.light_type,
-                              color: l.color, owned_by_client: true, status: "in_storage")
+                              color: l.color, spacing: l.spacing, owned_by_client: true, status: "in_storage")
                 }
                 try await supabase.from("fixtures").insert(stored).execute()
             }
@@ -189,7 +189,7 @@ private struct NewInvoice: Encodable {
 }
 private struct NewInvoiceItem: Encodable {
     let invoice_id: UUID; let item_type: ItemType?; let area: String?
-    let light_type: LightType?; let color: String?; let description: String
+    let light_type: LightType?; let color: String?; let spacing: String?; let description: String
     let quantity: Double; let unit: String?; let unit_price: Double
     let taxable: Bool; let sort: Int
 }
@@ -197,7 +197,7 @@ private struct NewStored: Encodable {
     let org_id: UUID; let property_id: UUID; let category: String
     let description: String; let quantity: Double; let unit: String?
     let item_type: ItemType?; let area: String?; let light_type: LightType?
-    let color: String?; let owned_by_client: Bool; let status: String
+    let color: String?; let spacing: String?; let owned_by_client: Bool; let status: String
 }
 private struct InvoicePaymentUpdate: Encodable {
     let amount_paid: Double; let status: String
