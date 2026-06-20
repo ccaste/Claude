@@ -31,6 +31,9 @@ struct MainTabView: View {
 
             JobsListView()
                 .tabItem { Label("Jobs", systemImage: "briefcase") }
+
+            CatalogListView()
+                .tabItem { Label("Price Book", systemImage: "tag") }
         }
     }
 }

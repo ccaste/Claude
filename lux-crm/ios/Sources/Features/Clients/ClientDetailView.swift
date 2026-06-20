@@ -4,6 +4,7 @@ struct ClientDetailView: View {
     let client: Client
     @State private var properties: [Property] = []
     @State private var jobs: [Job] = []
+    @State private var showingAddProperty = false
 
     var body: some View {
         List {
@@ -25,10 +26,17 @@ struct ClientDetailView: View {
                     Text("No properties yet").foregroundStyle(.secondary)
                 }
                 ForEach(properties) { property in
-                    VStack(alignment: .leading) {
-                        Text(property.label).font(.headline)
-                        Text(property.oneLineAddress).font(.caption).foregroundStyle(.secondary)
+                    NavigationLink(value: property) {
+                        VStack(alignment: .leading) {
+                            Text(property.label).font(.headline)
+                            Text(property.oneLineAddress).font(.caption).foregroundStyle(.secondary)
+                        }
                     }
+                }
+                Button {
+                    showingAddProperty = true
+                } label: {
+                    Label("Add property", systemImage: "plus")
                 }
             }
 
@@ -50,6 +58,12 @@ struct ClientDetailView: View {
             }
         }
         .navigationTitle(client.name)
+        .navigationDestination(for: Property.self) { PropertyDetailView(property: $0) }
+        .sheet(isPresented: $showingAddProperty) {
+            PropertyEditView(clientID: client.id) { new in
+                properties.append(new)
+            }
+        }
         .task { await loadRelated() }
     }
 

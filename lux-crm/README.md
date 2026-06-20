@@ -41,10 +41,11 @@ path. The anon key is safe to ship because RLS, not the app, guards the data.
 
 | Phase | Scope | Status |
 |---|---|---|
-| **1. Foundation** | Schema + RLS, auth, dashboard, clients, jobs, schedule | ✅ this PR |
-| **2. Core CRM** | Property & fixture editing, job creation, visit scheduling (install+removal pairs), photos, edit/archive clients, month calendar | next |
-| **3. Money** | Quotes → approval → invoice flow, PDF generation, Stripe payments (Edge Function), email/SMS reminders | |
-| **4. Field & polish** | Time tracking, offline cache, push notifications, crew permissions, reporting, recurring annual jobs | |
+| **1. Foundation** | Schema + RLS, auth, dashboard, clients, jobs, schedule | ✅ |
+| **2a. Christmas design core** | Price book (per ft / strand / 9ft / unit pricing), property add+detail, seasonal design builder with live total, quote generation; schema for material storage & power circuits | ✅ this PR |
+| **2b. Christmas ops** | Material/storage tracking UI (customer-owned, reclaim), power-circuit UI, seasonal job with auto install+removal visits, **renew last season's design**, photos | next |
+| **3. Money** | Quote → approval → invoice flow, PDF generation, Stripe payments (Edge Function), email/SMS reminders | |
+| **4. Field & polish** | On-site crew checklist, time tracking, offline cache, push notifications, crew permissions, reporting | |
 
 ## Cost vs Jobber
 

@@ -8,6 +8,7 @@ Postgres schema + row-level security for the CRM.
 2. In the dashboard, open **SQL Editor** and run the migrations **in order**:
    - `supabase/migrations/0001_schema.sql`
    - `supabase/migrations/0002_rls.sql`
+   - `supabase/migrations/0003_christmas.sql`  (Christmas design + price book + storage)
 
    (Or use the Supabase CLI: `supabase db push`.)
 
