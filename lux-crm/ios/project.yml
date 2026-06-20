@@ -1,0 +1,40 @@
+# XcodeGen project definition.
+# Generates LUXCRM.xcodeproj from these Swift sources so the project file isn't
+# hand-maintained. Install once: `brew install xcodegen`, then run `xcodegen`
+# from this directory to (re)create the .xcodeproj.
+
+name: LUXCRM
+options:
+  bundleIdPrefix: services.luxlighting
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"
+
+targets:
+  LUXCRM:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: LUX CRM
+        UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
+        NSLocationWhenInUseUsageDescription: Used to map job sites and show directions.
+        NSCameraUsageDescription: Used to attach photos of properties and installs.
+        NSPhotoLibraryUsageDescription: Used to attach photos to clients and jobs.
+    dependencies:
+      - package: Supabase
+    settings:
+      base:
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"   # iPhone
+        GENERATE_INFOPLIST_FILE: NO
