@@ -10,6 +10,6 @@ import Foundation
 // For real builds, prefer injecting via an .xcconfig / build setting rather than
 // hard-coding, but this is fine to get started.
 enum SupabaseConfig {
-    static let url = URL(string: "https://YOUR-PROJECT-ref.supabase.co")!
-    static let anonKey = "YOUR-SUPABASE-ANON-KEY"
+    static let url = URL(string: "https://noeceqqsawykybfavygn.supabase.co")!
+    static let anonKey = "YOUR-SUPABASE-ANON-KEY"  // Settings → API → Project API keys → anon public
 }
