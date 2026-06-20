@@ -1,0 +1,13 @@
+# Xcode / generated
+ios/*.xcodeproj
+ios/*.xcworkspace
+ios/build/
+ios/DerivedData/
+.DS_Store
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Local secrets (don't commit real keys)
+*.local.xcconfig
