@@ -36,8 +36,13 @@ final class QuoteDetailViewModel: ObservableObject {
         lines.append("")
         lines.append("Total: \(quote.total.usd)")
         if let dep = quote.deposit_amount, dep > 0 { lines.append("Deposit to reserve: \(dep.usd)") }
+        if let url = quote.portalURL {
+            lines.append("")
+            lines.append("View & accept your quote here:")
+            lines.append(url.absoluteString)
+        }
         lines.append("")
-        lines.append("Reply to accept, request changes, or with any questions. Thank you!")
+        lines.append("Questions? Just reply. Thank you!")
         return lines.joined(separator: "\n")
     }
 

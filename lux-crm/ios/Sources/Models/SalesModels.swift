@@ -20,6 +20,7 @@ struct Quote: Codable, Identifiable, Hashable {
     var deposit_amount: Double?
     var deposit_type: String?
     var deposit_percent: Double?
+    var public_token: UUID?
 }
 
 struct Invoice: Codable, Identifiable, Hashable {

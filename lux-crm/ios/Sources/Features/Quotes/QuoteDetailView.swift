@@ -75,6 +75,12 @@ struct QuoteDetailView: View {
                         showSendOptions = true
                     } label: { Label("Send to customer", systemImage: "paperplane") }
 
+                    if let url = vm.quote.portalURL {
+                        Link(destination: url) {
+                            Label("Preview customer page", systemImage: "safari")
+                        }
+                    }
+
                     Button {
                         Task { await vm.accept() }
                     } label: { Label("Accept quote", systemImage: "checkmark.circle.fill") }

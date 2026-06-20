@@ -13,6 +13,27 @@ Postgres schema + row-level security for the CRM.
    - `supabase/migrations/0005_quote_items.sql` (rich quote items + item defaults)
    - `supabase/migrations/0006_spacing_light_pricing.sql` (light-driven units, spacing)
    - `supabase/migrations/0007_quote_flow.sql`  (quote send/accept, changes requested)
+   - `supabase/migrations/0008_deposit_type.sql` (deposit as amount or percent)
+   - `supabase/migrations/0009_quote_portal.sql` (public token + accept_quote())
+
+## Customer quote portal (Edge Function)
+
+`supabase/functions/quote/` is a public page where a customer opens their quote
+link and can Accept / Request changes / Decline. On accept it calls
+`accept_quote()` which creates the job + invoice + storage.
+
+Deploy it (must be public, so disable JWT):
+
+```sh
+supabase link --project-ref noeceqqsawykybfavygn   # once
+supabase functions deploy quote --no-verify-jwt
+```
+
+The link the app sends looks like:
+`https://noeceqqsawykybfavygn.functions.supabase.co/quote?token=<public_token>`
+
+Next phase: online deposit payment (Stripe) on this page, and optional automated
+sending via Resend (email) / Twilio (SMS) instead of the phone composer.
 
    (Or use the Supabase CLI: `supabase db push`.)
 

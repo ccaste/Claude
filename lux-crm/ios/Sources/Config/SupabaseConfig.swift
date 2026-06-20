@@ -12,4 +12,15 @@ import Foundation
 enum SupabaseConfig {
     static let url = URL(string: "https://noeceqqsawykybfavygn.supabase.co")!
     static let anonKey = "YOUR-SUPABASE-ANON-KEY"  // Settings → API → Project API keys → anon public
+
+    // Base URL for Edge Functions (the customer quote portal lives here).
+    static let functionsBase = "https://noeceqqsawykybfavygn.functions.supabase.co"
+}
+
+extension Quote {
+    // The link a customer opens to view and accept this quote.
+    var portalURL: URL? {
+        guard let token = public_token else { return nil }
+        return URL(string: "\(SupabaseConfig.functionsBase)/quote?token=\(token.uuidString.lowercased())")
+    }
 }
