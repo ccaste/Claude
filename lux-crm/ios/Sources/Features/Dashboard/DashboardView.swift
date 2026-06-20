@@ -70,7 +70,7 @@ struct DashboardView: View {
 
         let openJobs: [Job] = (try? await supabase
             .from("jobs").select()
-            .in("status", values: ["lead", "quoted", "approved", "scheduled", "in_progress"])
+            .in("status", values: JobStatus.openStatuses.map(\.rawValue))
             .execute().value) ?? []
         openJobsCount = openJobs.count
     }

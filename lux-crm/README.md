@@ -42,9 +42,10 @@ path. The anon key is safe to ship because RLS, not the app, guards the data.
 | Phase | Scope | Status |
 |---|---|---|
 | **1. Foundation** | Schema + RLS, auth, dashboard, clients, jobs, schedule | ✅ |
-| **2a. Christmas design core** | Price book (per ft / strand / 9ft / unit pricing), property add+detail, seasonal design builder with live total, quote generation; schema for material storage & power circuits | ✅ this PR |
-| **2b. Christmas ops** | Material/storage tracking UI (customer-owned, reclaim), power-circuit UI, seasonal job with auto install+removal visits, **renew last season's design**, photos | next |
-| **3. Money** | Quote → approval → invoice flow, PDF generation, Stripe payments (Edge Function), email/SMS reminders | |
+| **2a. Christmas design core** | Price book (per ft / strand / 9ft / unit pricing), property add+detail, seasonal design builder with live total, quote generation | ✅ |
+| **2b. Lifecycle** | Full lead→quoted→approved→installed→stored pipeline, appointments (virtual/in-person), quote accept/decline, auto-invoice + deposit + balance payments, visits (install/greenery/maintenance/takedown). See [LIFECYCLE.md](LIFECYCLE.md) | ✅ this PR |
+| **2c. Christmas ops** | Material/storage tracking UI (customer-owned, reclaim), power-circuit UI, **renew last season's design**, photos | next |
+| **3. Money** | Invoice PDFs, Stripe online payments (Edge Function), email/SMS reminders | |
 | **4. Field & polish** | On-site crew checklist, time tracking, offline cache, push notifications, crew permissions, reporting | |
 
 ## Cost vs Jobber

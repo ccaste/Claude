@@ -20,20 +20,69 @@ enum ServiceType: String, Codable, CaseIterable {
 }
 
 enum JobStatus: String, Codable, CaseIterable {
-    case lead, quoted, approved, scheduled, in_progress, completed, on_hold, cancelled
+    // Lifecycle pipeline (in order)
+    case lead, quoted, approved, partially_installed, installed, ready_for_takedown, stored
+    // Off-pipeline states
+    case declined, cancelled, on_hold
+    // Legacy values kept so older rows still decode
+    case scheduled, in_progress, completed
 
     var label: String {
         switch self {
-        case .in_progress: return "In Progress"
-        case .on_hold:     return "On Hold"
-        default:           return rawValue.capitalized
+        case .lead:                return "Lead"
+        case .quoted:              return "Quoted"
+        case .approved:            return "Approved – Ready to Install"
+        case .partially_installed: return "Partially Installed"
+        case .installed:           return "Installed – In Maintenance"
+        case .ready_for_takedown:  return "Ready for Take Down"
+        case .stored:              return "Taken Down & Stored"
+        case .declined:            return "Declined"
+        case .cancelled:           return "Cancelled"
+        case .on_hold:             return "On Hold"
+        case .in_progress:         return "In Progress"
+        default:                   return rawValue.capitalized
         }
+    }
+
+    // The main customer journey, in order. Used to drive "advance phase".
+    static let pipeline: [JobStatus] = [
+        .lead, .quoted, .approved, .partially_installed,
+        .installed, .ready_for_takedown, .stored
+    ]
+
+    // Statuses that count as live work (for dashboards / open-job counts).
+    static let openStatuses: [JobStatus] = [
+        .lead, .quoted, .approved, .partially_installed, .installed, .ready_for_takedown
+    ]
+
+    var next: JobStatus? {
+        guard let i = JobStatus.pipeline.firstIndex(of: self),
+              i + 1 < JobStatus.pipeline.count else { return nil }
+        return JobStatus.pipeline[i + 1]
     }
 }
 
 enum VisitKind: String, Codable, CaseIterable {
-    case consult, install, service, maintenance, removal
-    var label: String { rawValue.capitalized }
+    case consult, install, greenery, maintenance, takedown, service, removal
+
+    var label: String {
+        switch self {
+        case .consult:  return "Appointment"
+        case .install:  return "Installation"
+        case .greenery: return "Greenery"
+        case .takedown, .removal: return "Take Down"
+        default:        return rawValue.capitalized
+        }
+    }
+
+    // Visit types offered when scheduling work on a job (excludes the consult,
+    // which is created as an appointment, and the legacy removal alias).
+    static let workKinds: [VisitKind] = [.install, .greenery, .maintenance, .takedown]
+}
+
+enum VisitMode: String, Codable, CaseIterable {
+    case in_person, virtual
+    var label: String { self == .in_person ? "In person" : "Virtual" }
 }
 
 enum VisitStatus: String, Codable, CaseIterable {
@@ -142,6 +191,7 @@ struct Visit: Codable, Identifiable, Hashable {
     var kind: VisitKind
     var status: VisitStatus
     var assigned_to: UUID?
+    var mode: VisitMode?
     var scheduled_start: Date?
     var scheduled_end: Date?
     var completed_at: Date?

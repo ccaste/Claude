@@ -9,6 +9,7 @@ Postgres schema + row-level security for the CRM.
    - `supabase/migrations/0001_schema.sql`
    - `supabase/migrations/0002_rls.sql`
    - `supabase/migrations/0003_christmas.sql`  (Christmas design + price book + storage)
+   - `supabase/migrations/0004_lifecycle.sql`  (lifecycle phases, appointments, deposits)
 
    (Or use the Supabase CLI: `supabase db push`.)
 
