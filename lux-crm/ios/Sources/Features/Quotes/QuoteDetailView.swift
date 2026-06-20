@@ -5,7 +5,6 @@ struct QuoteDetailView: View {
     var onDone: (() -> Void)?
 
     @State private var showDeposit = false
-    @State private var depositText = ""
     @State private var showSendOptions = false
     @State private var showMail = false
     @State private var showText = false
@@ -59,11 +58,13 @@ struct QuoteDetailView: View {
                 LabeledContent("Total", value: vm.quote.total.usd).font(.headline)
                 LabeledContent("Deposit") {
                     HStack {
-                        Text((vm.quote.deposit_amount ?? 0).usd)
-                        Button("Edit") {
-                            depositText = String(vm.quote.deposit_amount ?? 0)
-                            showDeposit = true
-                        }.font(.caption)
+                        VStack(alignment: .trailing, spacing: 1) {
+                            Text((vm.quote.deposit_amount ?? 0).usd)
+                            if vm.quote.deposit_type == "percent", let p = vm.quote.deposit_percent, p > 0 {
+                                Text("\(p.trimmed)% of total").font(.caption2).foregroundStyle(.secondary)
+                            }
+                        }
+                        Button("Edit") { showDeposit = true }.font(.caption)
                     }
                 }
             }
@@ -104,10 +105,13 @@ struct QuoteDetailView: View {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { onDone() } }
             }
         }
-        .alert("Required deposit", isPresented: $showDeposit) {
-            TextField("Amount", text: $depositText).keyboardType(.decimalPad)
-            Button("Save") { Task { await vm.setDeposit(Double(depositText) ?? 0) } }
-            Button("Cancel", role: .cancel) {}
+        .sheet(isPresented: $showDeposit) {
+            DepositEditorView(total: vm.quote.total,
+                              currentType: vm.quote.deposit_type ?? "amount",
+                              currentAmount: vm.quote.deposit_amount ?? 0,
+                              currentPercent: vm.quote.deposit_percent ?? 0) { type, value in
+                Task { await vm.setDeposit(type: type, value: value) }
+            }
         }
         .confirmationDialog("Send quote", isPresented: $showSendOptions, titleVisibility: .visible) {
             Button("Email") { if Composer.canEmail && vm.clientEmail != nil { showMail = true } else { sendFallback = true } }
@@ -134,5 +138,69 @@ struct QuoteDetailView: View {
             Text("Add the customer's email/phone, and use a real device with Mail or Messages set up.")
         }
         .task { await vm.load() }
+    }
+}
+
+// Set the required deposit as a fixed dollar amount or a percent of the total.
+struct DepositEditorView: View {
+    @Environment(\.dismiss) private var dismiss
+    let total: Double
+    @State private var mode: String
+    @State private var amount: Double
+    @State private var percent: Double
+    var onSave: (String, Double) -> Void
+
+    init(total: Double, currentType: String, currentAmount: Double, currentPercent: Double,
+         onSave: @escaping (String, Double) -> Void) {
+        self.total = total
+        _mode = State(initialValue: currentType)
+        _amount = State(initialValue: currentAmount)
+        _percent = State(initialValue: currentPercent)
+        self.onSave = onSave
+    }
+
+    private var resolved: Double { mode == "percent" ? (total * percent / 100) : amount }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Picker("Deposit", selection: $mode) {
+                    Text("Fixed amount").tag("amount")
+                    Text("Percent of total").tag("percent")
+                }
+                .pickerStyle(.segmented)
+
+                if mode == "amount" {
+                    HStack {
+                        Text("Amount"); Spacer(); Text("$")
+                        TextField("0.00", value: $amount, format: .number)
+                            .keyboardType(.decimalPad).multilineTextAlignment(.trailing).frame(maxWidth: 110)
+                    }
+                } else {
+                    HStack {
+                        Text("Percent"); Spacer()
+                        TextField("0", value: $percent, format: .number)
+                            .keyboardType(.decimalPad).multilineTextAlignment(.trailing).frame(maxWidth: 90)
+                        Text("%")
+                    }
+                }
+
+                Section {
+                    LabeledContent("Quote total", value: total.usd)
+                    LabeledContent("Deposit due", value: resolved.usd).font(.headline)
+                }
+            }
+            .navigationTitle("Required Deposit")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave(mode, mode == "percent" ? percent : amount)
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }

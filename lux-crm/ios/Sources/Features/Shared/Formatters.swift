@@ -13,6 +13,11 @@ extension Double {
     var trimmed: String {
         self == rounded() ? String(Int(self)) : String(self)
     }
+
+    func rounded(to places: Int) -> Double {
+        let p = pow(10.0, Double(places))
+        return (self * p).rounded() / p
+    }
 }
 
 extension String {

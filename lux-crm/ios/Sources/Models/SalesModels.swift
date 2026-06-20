@@ -18,6 +18,8 @@ struct Quote: Codable, Identifiable, Hashable {
     var total: Double
     var deposit_required: Bool?
     var deposit_amount: Double?
+    var deposit_type: String?
+    var deposit_percent: Double?
 }
 
 struct Invoice: Codable, Identifiable, Hashable {

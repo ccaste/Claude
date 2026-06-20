@@ -41,14 +41,23 @@ final class QuoteDetailViewModel: ObservableObject {
         return lines.joined(separator: "\n")
     }
 
-    func setDeposit(_ amount: Double) async {
-        struct DepositUpdate: Encodable { let deposit_required: Bool; let deposit_amount: Double }
+    // value is a dollar amount when type == "amount", or a percent (e.g. 50) when
+    // type == "percent". deposit_amount stores the resolved dollars.
+    func setDeposit(type: String, value: Double) async {
+        let amount = type == "percent" ? (quote.total * value / 100).rounded(to: 2) : value
+        struct DepositUpdate: Encodable {
+            let deposit_required: Bool; let deposit_amount: Double
+            let deposit_type: String; let deposit_percent: Double
+        }
         do {
             try await supabase.from("quotes")
-                .update(DepositUpdate(deposit_required: amount > 0, deposit_amount: amount))
+                .update(DepositUpdate(deposit_required: amount > 0, deposit_amount: amount,
+                                      deposit_type: type, deposit_percent: type == "percent" ? value : 0))
                 .eq("id", value: quote.id).execute()
             quote.deposit_required = amount > 0
             quote.deposit_amount = amount
+            quote.deposit_type = type
+            quote.deposit_percent = type == "percent" ? value : 0
         } catch { errorMessage = error.localizedDescription }
     }
 
