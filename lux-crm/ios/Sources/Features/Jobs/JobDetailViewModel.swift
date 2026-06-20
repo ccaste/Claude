@@ -16,14 +16,19 @@ final class JobDetailViewModel: ObservableObject {
     var workVisits: [Visit] { visits.filter { $0.kind != .consult } }
 
     func load() async {
+        // Copy actor-isolated values into locals so the parallel `async let`
+        // autoclosures don't reference `self.job` from a nonisolated context.
+        let jobID = job.id
+        let propertyID = job.property_id ?? job.id
+
         async let v: [Visit] = (try? await supabase.from("visits").select()
-            .eq("job_id", value: job.id).order("scheduled_start").execute().value) ?? []
+            .eq("job_id", value: jobID).order("scheduled_start").execute().value) ?? []
         // Quotes are generated from the property's design, so match on property.
         async let q: [Quote] = (try? await supabase.from("quotes").select()
-            .eq("property_id", value: job.property_id ?? job.id)
+            .eq("property_id", value: propertyID)
             .order("created_at", ascending: false).execute().value) ?? []
         async let inv: [Invoice] = (try? await supabase.from("invoices").select()
-            .eq("job_id", value: job.id).order("created_at", ascending: false)
+            .eq("job_id", value: jobID).order("created_at", ascending: false)
             .limit(1).execute().value) ?? []
         visits = await v
         quotes = await q
