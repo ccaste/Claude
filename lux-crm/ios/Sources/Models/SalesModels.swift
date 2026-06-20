@@ -55,4 +55,11 @@ struct LineItem: Codable, Identifiable, Hashable {
     var unit_price: Double
     var taxable: Bool
     var sort: Int
+    var item_type: ItemType?
+    var area: String?
+    var light_type: LightType?
+    var color: String?
+    var unit: String?
+
+    var lineTotal: Double { quantity * unit_price }
 }

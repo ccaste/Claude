@@ -1,14 +1,31 @@
 import SwiftUI
 
-// "Today" tab — at-a-glance for the crew: today's visits and quick counts.
+// "Today" tab — the starting point. New requests begin here; crews see today's
+// visits and open work at a glance.
 struct DashboardView: View {
     @EnvironmentObject var auth: AuthViewModel
     @State private var todaysVisits: [Visit] = []
     @State private var openJobsCount = 0
+    @State private var showNewRequest = false
+    @State private var reloadToken = 0
 
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Button {
+                        showNewRequest = true
+                    } label: {
+                        Label("New Request", systemImage: "plus.circle.fill")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                }
+
                 Section {
                     HStack {
                         statTile("Today's Visits", "\(todaysVisits.count)", "calendar")
@@ -35,7 +52,15 @@ struct DashboardView: View {
                 }
             }
             .navigationTitle(greeting)
-            .task { await load() }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showNewRequest = true } label: { Image(systemName: "plus") }
+                }
+            }
+            .sheet(isPresented: $showNewRequest) {
+                NewRequestView { reloadToken += 1 }
+            }
+            .task(id: reloadToken) { await load() }
             .refreshable { await load() }
         }
     }

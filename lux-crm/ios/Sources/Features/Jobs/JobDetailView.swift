@@ -21,6 +21,7 @@ struct JobDetailView: View {
             phaseSection
             appointmentsSection
             quotesSection
+            if !vm.lineItems.isEmpty { itemsSection }
             if vm.job.status != .lead && vm.job.status != .quoted && vm.job.status != .declined {
                 visitsSection
             }
@@ -137,6 +138,24 @@ struct JobDetailView: View {
                             .buttonStyle(.bordered).controlSize(.small)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private var itemsSection: some View {
+        Section("Items") {
+            ForEach(vm.lineItems) { item in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.description).font(.subheadline)
+                        Text([item.light_type?.label, item.color].compactMap { $0 }
+                            .filter { $0 != "None" }.joined(separator: " · "))
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Text("\(item.quantity.trimmed) \(item.unit ?? "") × \(item.unit_price.usd)")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
         }

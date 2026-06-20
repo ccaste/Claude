@@ -15,6 +15,10 @@ extension Double {
     }
 }
 
+extension String {
+    var nilIfEmpty: String? { trimmingCharacters(in: .whitespaces).isEmpty ? nil : self }
+}
+
 enum SeasonYear {
     // The holiday season we're selling/working. After mid-year, default to the
     // upcoming season; early in the year, you're likely still on the prior one.

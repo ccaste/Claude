@@ -8,6 +8,7 @@ final class JobDetailViewModel: ObservableObject {
     @Published var quotes: [Quote] = []
     @Published var invoice: Invoice?
     @Published var payments: [Payment] = []
+    @Published var lineItems: [LineItem] = []
     @Published var errorMessage: String?
 
     init(job: Job) { self.job = job }
@@ -34,6 +35,21 @@ final class JobDetailViewModel: ObservableObject {
         quotes = await q
         invoice = await inv.first
         await loadPayments()
+        await loadLineItems()
+    }
+
+    // Show the items that flowed through: the invoice's once accepted, else the
+    // latest quote's.
+    private func loadLineItems() async {
+        if let invID = invoice?.id {
+            lineItems = (try? await supabase.from("invoice_line_items").select()
+                .eq("invoice_id", value: invID).order("sort").execute().value) ?? []
+        } else if let quoteID = quotes.first?.id {
+            lineItems = (try? await supabase.from("quote_line_items").select()
+                .eq("quote_id", value: quoteID).order("sort").execute().value) ?? []
+        } else {
+            lineItems = []
+        }
     }
 
     private func loadPayments() async {
@@ -113,11 +129,25 @@ final class JobDetailViewModel: ObservableObject {
 
             if let invID = createdInvoice.first?.id, !lines.isEmpty {
                 let items = lines.enumerated().map { idx, l in
-                    NewInvoiceItem(invoice_id: invID, description: l.description,
-                                   quantity: l.quantity, unit_price: l.unit_price,
+                    NewInvoiceItem(invoice_id: invID, item_type: l.item_type, area: l.area,
+                                   light_type: l.light_type, color: l.color,
+                                   description: l.description, quantity: l.quantity,
+                                   unit: l.unit, unit_price: l.unit_price,
                                    taxable: l.taxable, sort: idx)
                 }
                 try await supabase.from("invoice_line_items").insert(items).execute()
+            }
+
+            // The items the customer owns now live in storage for this property.
+            if let propertyID = quote.property_id, !lines.isEmpty {
+                let stored = lines.map { l in
+                    NewStored(org_id: job.org_id, property_id: propertyID,
+                              category: l.item_type?.rawValue ?? "other",
+                              description: l.description, quantity: l.quantity, unit: l.unit,
+                              item_type: l.item_type, area: l.area, light_type: l.light_type,
+                              color: l.color, owned_by_client: true, status: "in_storage")
+                }
+                try await supabase.from("fixtures").insert(stored).execute()
             }
 
             await setStatus(.approved)
@@ -158,8 +188,16 @@ private struct NewInvoice: Encodable {
     let subtotal: Double; let tax: Double; let total: Double; let deposit_amount: Double
 }
 private struct NewInvoiceItem: Encodable {
-    let invoice_id: UUID; let description: String
-    let quantity: Double; let unit_price: Double; let taxable: Bool; let sort: Int
+    let invoice_id: UUID; let item_type: ItemType?; let area: String?
+    let light_type: LightType?; let color: String?; let description: String
+    let quantity: Double; let unit: String?; let unit_price: Double
+    let taxable: Bool; let sort: Int
+}
+private struct NewStored: Encodable {
+    let org_id: UUID; let property_id: UUID; let category: String
+    let description: String; let quantity: Double; let unit: String?
+    let item_type: ItemType?; let area: String?; let light_type: LightType?
+    let color: String?; let owned_by_client: Bool; let status: String
 }
 private struct InvoicePaymentUpdate: Encodable {
     let amount_paid: Double; let status: String

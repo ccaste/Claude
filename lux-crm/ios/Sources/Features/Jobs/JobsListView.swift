@@ -59,7 +59,7 @@ struct JobsListView: View {
                 }
             }
             .sheet(isPresented: $showingNewLead) {
-                NewLeadView { new in jobs.insert(new, at: 0) }
+                NewRequestView { Task { await load() } }
             }
             .overlay { if isLoading { ProgressView() } }
             .refreshable { await load() }

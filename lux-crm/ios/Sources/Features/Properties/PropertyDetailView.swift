@@ -1,22 +1,19 @@
 import SwiftUI
 
-// A property: its info, install notes, and the per-season lighting designs.
+// A property: its info, the quotes built for it, and what's in storage.
 struct PropertyDetailView: View {
-    @EnvironmentObject var auth: AuthViewModel
     let property: Property
 
-    @State private var designs: [Design] = []
-    @State private var isLoading = false
+    @State private var quotes: [Quote] = []
+    @State private var storage: [Fixture] = []
+    @State private var buildingQuote: QuoteStart?
 
     var body: some View {
         List {
             Section("Address") {
-                if !property.oneLineAddress.isEmpty {
-                    Text(property.oneLineAddress)
-                }
+                if !property.oneLineAddress.isEmpty { Text(property.oneLineAddress) }
                 if let s = property.stories { LabeledContent("Stories", value: "\(s)") }
             }
-
             if let access = property.access_notes, !access.isEmpty {
                 Section("Access") { Text(access) }
             }
@@ -24,65 +21,62 @@ struct PropertyDetailView: View {
                 Section("Power") { Text(power) }
             }
 
-            Section("Lighting Designs") {
-                if designs.isEmpty && !isLoading {
-                    Text("No design yet. Create one for this season.")
-                        .foregroundStyle(.secondary)
-                }
-                ForEach(designs) { design in
-                    NavigationLink(value: design) {
-                        HStack {
-                            Text("\(String(design.season_year)) Season").font(.headline)
-                            Spacer()
-                            Text(design.status.label)
-                                .font(.caption).foregroundStyle(.secondary)
+            Section("Quotes") {
+                if quotes.isEmpty { Text("No quotes yet.").foregroundStyle(.secondary) }
+                ForEach(quotes) { q in
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(q.number).font(.headline)
+                            Text(q.status.rawValue.capitalized).font(.caption).foregroundStyle(.secondary)
                         }
+                        Spacer()
+                        Text(q.total.usd).font(.headline)
                     }
                 }
-                Button {
-                    Task { await createDesign() }
-                } label: {
-                    Label("New design for \(String(SeasonYear.current))", systemImage: "plus")
+                Button { buildingQuote = QuoteStart(property: property) } label: {
+                    Label("Build quote", systemImage: "plus.rectangle.on.rectangle")
+                }
+            }
+
+            Section("In Storage") {
+                if storage.isEmpty {
+                    Text("Nothing stored yet. Items appear here once a quote is accepted.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                ForEach(storage) { item in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.description ?? item.category).font(.subheadline)
+                            Text([item.light_type?.label, item.color].compactMap { $0 }
+                                .filter { $0 != "None" }.joined(separator: " · "))
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Text(item.status?.label ?? "In Storage").font(.caption).foregroundStyle(.secondary)
+                    }
                 }
             }
         }
         .navigationTitle(property.label)
-        .navigationDestination(for: Design.self) { design in
-            DesignDetailView(design: design, property: property)
+        .navigationDestination(item: $buildingQuote) { q in
+            QuoteBuilderView(property: q.property, job: nil) {
+                buildingQuote = nil
+                Task { await load() }
+            }
         }
         .task { await load() }
     }
 
     private func load() async {
-        isLoading = true
-        defer { isLoading = false }
-        designs = (try? await supabase
-            .from("designs").select()
+        quotes = (try? await supabase.from("quotes").select()
             .eq("property_id", value: property.id)
-            .order("season_year", ascending: false)
-            .execute().value) ?? []
+            .order("created_at", ascending: false).execute().value) ?? []
+        storage = (try? await supabase.from("fixtures").select()
+            .eq("property_id", value: property.id).execute().value) ?? []
     }
+}
 
-    private func createDesign() async {
-        guard let orgID = auth.profile?.org_id else { return }
-        // Don't duplicate a design for the same season.
-        if let existing = designs.first(where: { $0.season_year == SeasonYear.current }) {
-            _ = existing
-            return
-        }
-        struct NewDesign: Encodable {
-            let org_id: UUID
-            let property_id: UUID
-            let season_year: Int
-        }
-        do {
-            let inserted: [Design] = try await supabase
-                .from("designs")
-                .insert(NewDesign(org_id: orgID, property_id: property.id, season_year: SeasonYear.current))
-                .select()
-                .execute()
-                .value
-            if let new = inserted.first { designs.insert(new, at: 0) }
-        } catch { }
-    }
+struct QuoteStart: Hashable, Identifiable {
+    let property: Property
+    var id: UUID { property.id }
 }

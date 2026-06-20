@@ -162,12 +162,15 @@ struct Fixture: Codable, Identifiable, Hashable {
     var description: String?
     var quantity: Double
     var unit: String?
-    var wattage: Double?
     var location: String?
     var owned_by_client: Bool
-    var in_storage: Bool
-    var installed_year: Int?
     var notes: String?
+    var status: MaterialStatus?
+    var storage_location: String?
+    var item_type: ItemType?
+    var area: String?
+    var light_type: LightType?
+    var color: String?
 }
 
 struct Job: Codable, Identifiable, Hashable {
